@@ -29,4 +29,7 @@ source powerlevel10k.inc
 
 sudo apt install -y \
 	tmux \
-	stow
+	stow \
+	feh
+
+git clone https://github.com/tgasslander/dotfiles.git ~/dotfiles

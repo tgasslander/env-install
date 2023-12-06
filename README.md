@@ -1,2 +1,4 @@
 # env-install
-Automate installation of the essentials
+Automate installation of the essentials.
+
+Linux only for now.

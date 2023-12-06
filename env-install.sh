@@ -29,6 +29,7 @@ sudo apt install -y \
 	i3-wm \
 	i3blocks \
 	i3lock \
+	vim \
 	dmenu
 
 echo "zsh"

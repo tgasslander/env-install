@@ -6,6 +6,9 @@ sudo apt update
 echo "Installing dev env"
 echo
 
+echo "Installing kitty"
+curl -L https://sw.kovidgoyal.net/kitty/installer.sh
+
 echo "Hack font"
 echo
 ./fonts.inc
@@ -42,7 +45,7 @@ fi
 
 git clone https://github.com/tgasslander/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-stow i3 i3blocks nvim zsh p10k Xresources tmux
+stow i3 i3blocks nvim zsh p10k Xresources tmux kitty
 cd -
 
 echo "oh-my-zsh"

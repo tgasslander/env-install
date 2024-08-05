@@ -9,15 +9,14 @@ fi
 
 if [ -f ${HOME}/${APP_IMG_DIR}/nvim.appimage ]; then
 	echo "nvim is already installed"
-	exit 0
+else
+	echo "Downloading nvim"
+	echo
+	curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+	echo "Installing the appimage"
+	chmod u+x nvim.appimage
+	mv nvim.appimage ${HOME}/${APP_IMG_DIR}
+
+	ln -s ${HOME}/${APP_IMG_DIR}/nvim.appimage ${HOME}/${APP_IMG_DIR}/nvim
+	echo "nvim installed successfully"
 fi
-
-echo "Downloading nvim"
-echo
-curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
-echo "Installing the appimage"
-chmod u+x nvim.appimage
-mv nvim.appimage ${HOME}/${APP_IMG_DIR} 
-
-ln -s ${HOME}/${APP_IMG_DIR}/nvim.appimage ${HOME}/${APP_IMG_DIR}/nvim
-echo "nvim installed successfully"

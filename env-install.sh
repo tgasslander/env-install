@@ -36,6 +36,16 @@ sudo apt install -y \
 	vim \
 	dmenu
 
+echo "dotfiles"
+if [ -d "${HOME}/dotfiles" ]; then
+	rm -rf ~/dotfiles
+fi
+git clone https://github.com/tgasslander/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+stow i3 i3blocks nvim zsh p10k Xresources tmux kitty
+cd -
+echo "stowed configs from dotfiles"
+
 echo "zsh"
 echo
 if [ ! -d "${SZH}" ]; then
@@ -43,16 +53,6 @@ if [ ! -d "${SZH}" ]; then
 else
 	echo "ZSH already installed"
 fi
-
-echo "dotfiles"
-if [ -d "${HOME}/dotfiles" ]; then
-	rm -rf ~/dotfiles
-fi
-git clone https://github.com/tgasslander/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-echo "stowing configs from dotfiles"
-stow i3 i3blocks nvim zsh p10k Xresources tmux kitty
-cd -
 
 echo "oh-my-zsh"
 echo

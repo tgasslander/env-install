@@ -43,6 +43,10 @@ else
 	echo "ZSH already installed"
 fi
 
+echo "dotfiles"
+if [ -d "${HOME}/dotfiles" ]; then
+	rm -rf ~/dotfiles
+fi
 git clone https://github.com/tgasslander/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 stow i3 i3blocks nvim zsh p10k Xresources tmux kitty

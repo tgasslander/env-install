@@ -56,16 +56,14 @@ cd -
 echo "oh-my-zsh"
 echo
 if [ ! -d "${HOME}/.oh-my-zsh" ]; then
+	echo "removing old oh-my-zsh"
 	rm -rf ~/.oh-my-zsh
-	source "oh-my-zsh.inc"
 else
-	echo "oh-my-zsh already installed"
+	source "oh-my-zsh.inc"
 fi
 
 echo "nvim"
 echo
 source nvim.inc
-
-source ~/.zshrc
 
 echo "Close the terminal and reopen to see the changes"

@@ -8,7 +8,7 @@ if [ ! -d ${HOME}/${APP_IMG_DIR} ]; then
 fi
 
 if [ -f ${HOME}/${APP_IMG_DIR}/nvim.appimage ]; then
-	echo "nvim is already installed"
+	echo "nvim appimage is already installed"
 else
 	echo "Downloading nvim"
 	echo
@@ -17,6 +17,7 @@ else
 	chmod u+x nvim.appimage
 	mv nvim.appimage ${HOME}/${APP_IMG_DIR}
 
-	ln -s ${HOME}/${APP_IMG_DIR}/nvim.appimage ${HOME}/${APP_IMG_DIR}/nvim
-	echo "nvim installed successfully"
 fi
+
+ln -s ${HOME}/${APP_IMG_DIR}/nvim.appimage ${HOME}/${APP_IMG_DIR}/nvim
+echo "nvim installed successfully"

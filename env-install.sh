@@ -55,9 +55,9 @@ cd -
 
 echo "oh-my-zsh"
 echo
-if [ ! -d "${HOME}/.oh-my-zsh" ]; then
+if [ -d "${HOME}/.oh-my-zsh" ]; then
 	echo "removing old oh-my-zsh"
-	rm -rf ~/.oh-my-zsh
+	rm -rf "${HOME}/.oh-my-zsh"
 else
 	source "oh-my-zsh.inc"
 fi

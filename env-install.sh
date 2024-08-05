@@ -42,7 +42,7 @@ if [ -d "${HOME}/dotfiles" ]; then
 fi
 git clone https://github.com/tgasslander/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-stow i3 i3blocks nvim zsh p10k Xresources tmux kitty
+stow i3 i3blocks nvim p10k Xresources tmux kitty
 cd -
 echo "stowed configs from dotfiles"
 
@@ -54,6 +54,10 @@ else
 	echo "ZSH already installed"
 fi
 
+echo "nvim"
+echo
+source nvim.inc
+
 echo "oh-my-zsh"
 echo
 if [ -d "${HOME}/.oh-my-zsh" ]; then
@@ -62,8 +66,8 @@ if [ -d "${HOME}/.oh-my-zsh" ]; then
 fi
 source "oh-my-zsh.inc"
 
-echo "nvim"
-echo
-source nvim.inc
+cd ~/dotfiles
+stow zsh
+cd -
 
 echo "Close the terminal and reopen to see the changes"

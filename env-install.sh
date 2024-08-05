@@ -7,7 +7,8 @@ echo "Installing dev env"
 echo
 
 echo "Installing kitty"
-curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin \
+    launch=n
 
 echo "Hack font"
 echo

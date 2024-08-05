@@ -30,7 +30,7 @@ sudo apt install -y \
 	curl \
 	clang \
 	htop \
-	i3-wm \
+	i3 \
 	i3blocks \
 	i3lock \
 	vim \

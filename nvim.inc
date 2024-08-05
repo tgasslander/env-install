@@ -2,7 +2,15 @@
 APP_IMG_DIR="appimages"
 
 echo "Using directory ${HOME}/${APP_IMG_DIR}" 
-mkdir -p ${HOME}/${APP_IMG_DIR}
+if [ ! -d ${HOME}/${APP_IMG_DIR} ]; then
+	echo "Creating directory ${HOME}/${APP_IMG_DIR}"
+	mkdir -p ${HOME}/${APP_IMG_DIR}
+fi
+
+if [ -f ${HOME}/${APP_IMG_DIR}/nvim.appimage ]; then
+	echo "nvim is already installed"
+	exit 0
+fi
 
 echo "Downloading nvim"
 echo
@@ -12,3 +20,4 @@ chmod u+x nvim.appimage
 mv nvim.appimage ${HOME}/${APP_IMG_DIR} 
 
 ln -s ${HOME}/${APP_IMG_DIR}/nvim.appimage ${HOME}/${APP_IMG_DIR}/nvim
+echo "nvim installed successfully"

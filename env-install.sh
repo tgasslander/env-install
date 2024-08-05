@@ -50,6 +50,7 @@ if [ -d "${HOME}/dotfiles" ]; then
 fi
 git clone https://github.com/tgasslander/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+echo "stowing configs from dotfiles"
 stow i3 i3blocks nvim zsh p10k Xresources tmux kitty
 cd -
 
@@ -58,9 +59,8 @@ echo
 if [ -d "${HOME}/.oh-my-zsh" ]; then
 	echo "removing old oh-my-zsh"
 	rm -rf "${HOME}/.oh-my-zsh"
-else
-	source "oh-my-zsh.inc"
 fi
+source "oh-my-zsh.inc"
 
 echo "nvim"
 echo

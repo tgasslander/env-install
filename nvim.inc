@@ -20,4 +20,5 @@ else
 fi
 
 ln -s ${HOME}/${APP_IMG_DIR}/nvim.appimage ${HOME}/${APP_IMG_DIR}/nvim
+
 echo "nvim installed successfully"

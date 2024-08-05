@@ -66,4 +66,6 @@ echo "nvim"
 echo
 source nvim.inc
 
+source ~/.zshrc
 
+echo "Close the terminal and reopen to see the changes"

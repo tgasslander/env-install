@@ -51,6 +51,7 @@ cd -
 echo "oh-my-zsh"
 echo
 if [ ! -d "${HOME}/.oh-my-zsh" ]; then
+	rm -rf ~/.oh-my-zsh
 	source "oh-my-zsh.inc"
 else
 	echo "oh-my-zsh already installed"

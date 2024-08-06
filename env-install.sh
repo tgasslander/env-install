@@ -14,9 +14,6 @@ echo "Hack font"
 echo
 ./fonts.inc
 
-echo "Powerlevel10k theme"
-echo
-source powerlevel10k.inc
 
 echo "i3 sources"
 echo
@@ -66,8 +63,14 @@ if [ -d "${HOME}/.oh-my-zsh" ]; then
 fi
 source "oh-my-zsh.inc"
 
+mv ~/.zshrc ~/.zshrc.bak
 cd ~/dotfiles
 stow zsh
 cd -
 
-echo "Close the terminal and reopen to see the changes"
+echo "Powerlevel10k theme"
+echo
+source powerlevel10k.inc
+
+source ~/.zshrc
+echo "Done"

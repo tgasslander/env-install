@@ -37,7 +37,7 @@ sudo apt install -y \
 	dmenu
 
 echo "nvm"
-PROFILE=/dev/null bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh --no-use | bash'
+PROFILE=/dev/null bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash'
 
 echo "dotfiles"
 if [ -d "${HOME}/dotfiles" ]; then

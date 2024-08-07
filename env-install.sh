@@ -33,7 +33,12 @@ sudo apt install -y \
 	i3blocks \
 	i3lock \
 	vim \
+	build-essential \
 	dmenu
+
+echo "nvm"
+PROFILE=/dev/null bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh --no-use | bash'
+nvm install node
 
 echo "dotfiles"
 if [ -d "${HOME}/dotfiles" ]; then

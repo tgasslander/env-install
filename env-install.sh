@@ -38,7 +38,6 @@ sudo apt install -y \
 
 echo "nvm"
 PROFILE=/dev/null bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh --no-use | bash'
-nvm install node
 
 echo "dotfiles"
 if [ -d "${HOME}/dotfiles" ]; then
@@ -80,4 +79,8 @@ echo
 source powerlevel10k.inc
 
 source ~/.zshrc
+
+echo "node.js"
+nvm install node
+
 echo "Done"

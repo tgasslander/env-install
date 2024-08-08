@@ -34,6 +34,7 @@ sudo apt install -y \
 	i3lock \
 	vim \
 	build-essential \
+	python3.10-venv \
 	dmenu
 
 echo "nvm"
@@ -84,5 +85,7 @@ echo "node.js"
 NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 nvm install node
+
+sudo snap install --classic go
 
 echo "Done"

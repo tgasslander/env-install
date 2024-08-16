@@ -35,6 +35,7 @@ sudo apt install -y \
 	vim \
 	build-essential \
 	python3.10-venv \
+	picom \
 	dmenu
 
 echo "nvm"
@@ -46,7 +47,7 @@ if [ -d "${HOME}/dotfiles" ]; then
 fi
 git clone https://github.com/tgasslander/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-stow i3 i3blocks nvim p10k Xresources tmux kitty
+stow i3 i3blocks nvim p10k Xresources tmux kitty picom
 cd -
 echo "stowed configs from dotfiles"
 

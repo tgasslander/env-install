@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "apt upate"
+echo "apt update"
 sudo apt update
 
 echo "Installing dev env"
@@ -47,7 +47,7 @@ if [ -d "${HOME}/dotfiles" ]; then
 fi
 git clone https://github.com/tgasslander/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-stow i3 i3blocks nvim p10k Xresources tmux kitty picom rofi
+stow i3 i3blocks nvim starship Xresources tmux kitty picom rofi
 cd -
 echo "stowed configs from dotfiles"
 
@@ -76,9 +76,9 @@ cd ~/dotfiles
 stow zsh
 cd -
 
-echo "Powerlevel10k theme"
+echo "Starship prompt"
 echo
-source powerlevel10k.inc
+source starship.inc
 
 source ~/.zshrc
 

@@ -36,7 +36,7 @@ sudo apt install -y \
 	build-essential \
 	python3.10-venv \
 	picom \
-	dmenu
+	rofi
 
 echo "nvm"
 PROFILE=/dev/null bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash'
@@ -47,7 +47,7 @@ if [ -d "${HOME}/dotfiles" ]; then
 fi
 git clone https://github.com/tgasslander/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-stow i3 i3blocks nvim p10k Xresources tmux kitty picom
+stow i3 i3blocks nvim p10k Xresources tmux kitty picom rofi
 cd -
 echo "stowed configs from dotfiles"
 

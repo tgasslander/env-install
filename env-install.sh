@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Add the WezTerm repository
+curl -fsSL https://apt.fury.io/wez/gpg.key | sudo gpg --yes --dearmor -o /usr/share/keyrings/wezterm-fury.gpg
+echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' | sudo tee /etc/apt/sources.list.d/wezterm.list
+
 echo "apt update"
 sudo apt update
 
@@ -36,6 +40,7 @@ sudo apt install -y \
 	build-essential \
 	python3.10-venv \
 	picom \
+	wezterm \
 	rofi
 
 echo "nvm"
@@ -47,7 +52,7 @@ if [ -d "${HOME}/dotfiles" ]; then
 fi
 git clone https://github.com/tgasslander/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-stow i3 i3blocks nvim starship Xresources tmux kitty picom rofi
+stow i3 i3blocks nvim starship Xresources tmux kitty picom rofi wezterm
 cd -
 echo "stowed configs from dotfiles"
 

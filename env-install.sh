@@ -41,6 +41,7 @@ sudo apt install -y \
 	python3.10-venv \
 	picom \
 	wezterm \
+	snap \
 	rofi
 
 echo "nvm"

@@ -43,6 +43,8 @@ sudo apt install -y \
 	wezterm \
 	snap \
 	snapd \
+	curl \
+	wget \
 	rofi
 
 echo "nvm"

@@ -37,6 +37,8 @@ sudo apt install -y \
 	python3.10-venv \
 	picom \
 	snapd \
+	curl \
+	wget \
 	rofi
 
 echo "nvm"

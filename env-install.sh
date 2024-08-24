@@ -42,6 +42,7 @@ sudo apt install -y \
 	picom \
 	wezterm \
 	snap \
+	snapd \
 	rofi
 
 echo "nvm"

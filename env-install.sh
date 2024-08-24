@@ -36,6 +36,7 @@ sudo apt install -y \
 	build-essential \
 	python3.10-venv \
 	picom \
+	snap \
 	rofi
 
 echo "nvm"

@@ -10,6 +10,28 @@ sudo apt update
 echo "Installing dev env"
 echo
 
+sudo apt install -y \
+	zsh \
+	tmux \
+	stow \
+	feh \
+	curl \
+	clang \
+	htop \
+	i3 \
+	i3blocks \
+	i3lock \
+	vim \
+	build-essential \
+	python3-venv \
+	picom \
+	wezterm \
+	snap \
+	snapd \
+	curl \
+	wget \
+	rofi
+
 echo "Installing kitty"
 curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin \
     launch=n
@@ -24,28 +46,6 @@ echo
 echo "i3 sources"
 echo
 source i3.inc
-
-sudo apt install -y \
-	zsh \
-	tmux \
-	stow \
-	feh \
-	curl \
-	clang \
-	htop \
-	i3 \
-	i3blocks \
-	i3lock \
-	vim \
-	build-essential \
-	python3.10-venv \
-	picom \
-	wezterm \
-	snap \
-	snapd \
-	curl \
-	wget \
-	rofi
 
 echo "nvm"
 PROFILE=/dev/null bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash'

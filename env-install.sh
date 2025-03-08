@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "apt upate"
+echo "apt update"
 sudo apt update
 
 echo "Installing dev env"

@@ -1,5 +1,9 @@
 #!/bin/bash
-sudo snap install nvim --classic
+if command -v pacman >/dev/null 2>&1; then
+	sudo pacman -S --needed --noconfirm neovim
+else
+	sudo snap install nvim --classic
+fi
 
 echo "nvim installed successfully"
 

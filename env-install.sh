@@ -31,8 +31,8 @@ else
 		sway swaylock swayidle swaybg brightnessctl wlr-randr jq \
 		i3blocks vim \
 		base-devel python \
-		wezterm wget rofi unzip \
-		network-manager-applet sysstat
+		wget rofi unzip \
+		network-manager-applet sysstat mako polkit-gnome
 fi
 
 echo "Installing kitty"
@@ -76,7 +76,7 @@ cd ~/dotfiles || exit
 if [ "$PKG_MGR" = "apt" ]; then
 	stow -R i3 i3blocks nvim starship Xresources tmux kitty picom rofi wezterm
 else
-	stow -R sway i3blocks nvim starship Xresources tmux kitty rofi wezterm
+	stow -R sway i3blocks nvim starship Xresources tmux kitty rofi
 fi
 cd - || exit
 echo "stowed configs from dotfiles"

@@ -7,15 +7,21 @@ DL_DIR="fonts"
 echo "Installing font: ${FONT_NAME}"
 echo
 
+# Skip if already installed
+if fc-list 2>/dev/null | grep -qi "${FONT_NAME}"; then
+	echo "Font: ${FONT_NAME} is already installed, skipping"
+	exit 0
+fi
+
 # Check if the directory exists
 mkdir -p "${FONTS_DIR}"
 echo "Using font directory: ${FONTS_DIR}"
 
 # Download fonts
-cd ~/Downloads
+cd ~/Downloads || exit
 mkdir -p "${DL_DIR}"
 
-cd ${DL_DIR}
+cd "${DL_DIR}" || exit
 echo "Downloading ${FONT_NAME} into ${DL_DIR}..."
 wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/Hack.zip
 echo "Downloading done"
@@ -31,8 +37,8 @@ cp -r *.ttf "${FONTS_DIR}"
 echo "Copying done"
 
 echo "Cleaning up"
-cd ..
-rm -Rf ${DL_DIR} 
+cd .. || exit
+rm -Rf "${DL_DIR}"
 
 echo "Clearing the font cache"
 fc-cache -f -v > /dev/null 2>&1

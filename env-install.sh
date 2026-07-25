@@ -20,7 +20,8 @@ if [ "$PKG_MGR" = "apt" ]; then
 		zsh tmux stow feh curl clang htop \
 		i3 i3blocks i3lock vim \
 		build-essential python3-venv \
-		picom wezterm snapd wget rofi unzip
+		picom wezterm snapd wget rofi unzip \
+		network-manager-gnome sysstat
 else
 	# Sway replaces i3+X11+picom on Arch: it's Wayland-native (no xorg-server
 	# needed at all) and deliberately i3-config-compatible. See
@@ -30,7 +31,8 @@ else
 		sway swaylock swayidle swaybg brightnessctl wlr-randr jq \
 		i3blocks vim \
 		base-devel python \
-		wezterm wget rofi unzip
+		wezterm wget rofi unzip \
+		network-manager-applet sysstat
 fi
 
 echo "Installing kitty"

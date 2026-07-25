@@ -51,6 +51,11 @@ source i3.inc
 echo "nvm"
 PROFILE=/dev/null bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash'
 
+echo "node.js"
+NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+nvm install node
+
 echo "dotfiles"
 if [ -d "${HOME}/dotfiles/.git" ]; then
 	echo "dotfiles already cloned, pulling latest"
@@ -68,10 +73,10 @@ echo "stowed configs from dotfiles"
 
 echo "zsh"
 echo
-if ! command -v zsh >/dev/null 2>&1; then
+if [ "$(getent passwd "$USER" | cut -d: -f7)" != "$(command -v zsh)" ]; then
 	source zsh.inc
 else
-	echo "ZSH already installed"
+	echo "zsh is already the default shell"
 fi
 
 echo "nvim"
@@ -85,6 +90,13 @@ if [ -d "${HOME}/.oh-my-zsh" ]; then
 else
 	source "oh-my-zsh.inc"
 fi
+
+echo "zsh-autosuggestions and zsh-syntax-highlighting plugins"
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+[ -d "${ZSH_CUSTOM}/plugins/zsh-autosuggestions" ] || \
+	git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM}/plugins/zsh-autosuggestions"
+[ -d "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting" ] || \
+	git clone https://github.com/zsh-users/zsh-syntax-highlighting "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting"
 
 # Back up a real ~/.zshrc once (e.g. the one oh-my-zsh just wrote), never
 # clobbering an existing backup. On reruns ~/.zshrc is already a stow symlink,
@@ -103,13 +115,7 @@ echo "Starship prompt"
 echo
 source starship.inc
 
-# shellcheck disable=SC1090
-source ~/.zshrc
-
-echo "node.js"
-NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-nvm install node
+echo "~/.zshrc is zsh-specific and can't be sourced from this bash script; open a new zsh shell (or restart your terminal) to pick it up"
 
 if [ "$PKG_MGR" = "apt" ]; then
 	sudo snap install --classic go

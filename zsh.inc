@@ -1,3 +1,3 @@
 #!/bin/bash
 
-chsh -s "$(which zsh)"
+sudo chsh -s "$(command -v zsh)" "$USER"

@@ -704,9 +704,10 @@ historical task content in place, the deltas are recorded here:
 - **Rofi:** confirmed native-Wayland as of rofi 2.0.0 (already the installed
   version) — no XWayland dependency, contrary to the "runs via Sway's
   built-in XWayland support" assumption in the original design.
-- **Chrome:** `$mod+c` now runs `google-chrome --ozone-platform-hint=auto`
-  (forces native Wayland rendering) so it doesn't depend on XWayland, which
-  Sway's Arch package does not pull in by default.
+- **Chrome:** `$mod+c` now runs plain `google-chrome-stable` (no
+  `--ozone-platform-hint=auto`) — see the wl_shm crash amendment below, which
+  reverses the "no XWayland dependency" decision this bullet originally
+  recorded.
 - **New in the final review/user requests, not in the original plan:**
   `for_window [app_id="org.gnome.Calculator"] floating enable` (added
   alongside the existing `class` rule — `class` only matches XWayland
@@ -718,3 +719,40 @@ historical task content in place, the deltas are recorded here:
   new Catppuccin Frappe green `$color_focus_border #a6d189`); `swayfx`
   (corner-radius/blur Sway fork) was considered for rounded corners and
   explicitly declined by the user in favor of staying on vanilla Sway.
+
+## Amendment (2026-07-26): wl_shm crash root cause refined, XWayland reintroduced for Chrome and wezterm
+
+Debugged live on the user's machine after both `google-chrome-stable`
+(`--ozone-platform-hint=auto`, native Wayland) and manually-invoked
+`wezterm-gui` started SIGABRTing on launch under Sway. This supersedes the
+Task 9/final-review terminal and Chrome amendments above:
+
+- **Root cause is not a vague "known upstream wezterm/wlroots issue" —** both
+  crashes were traced to the identical low-level error,
+  `[wayland-client error] Attempted to dispatch unknown opcode 0 for wl_shm,
+  aborting.`, in `libwayland-client.so` itself. `wayland` (1.25.0-1.1,
+  installed 2026-07-24) and `wlroots0.20`/`sway` (0.20.2-1.1/1:1.12-4.1,
+  installed 2026-07-25) were both bleeding-edge installs within 48h of each
+  other; the two apps are otherwise unrelated codebases (Chrome/C++,
+  wezterm-gui/Rust) and both work fine under Plasma/kwin and under XWayland,
+  which localizes the bug to the sway/wlroots↔wayland-client `wl_shm`
+  dispatch path, not either application.
+- **Fix applied: force XWayland for both, not a version pin.** The user
+  explicitly preferred this over downgrading+`IgnorePkg`-locking `wayland`/
+  `wlroots0.20`, since a lock is easy to forget to release.
+  `~/.config/chrome-flags.conf` (new, machine-local, not stowed) now sets
+  `--ozone-platform=x11`; the `$mod+c` binding in `sway/.config/sway/config`
+  dropped `--ozone-platform-hint=auto` (it was overriding back to native
+  Wayland). `wezterm/.config/wezterm/wezterm.lua` got `config.enable_wayland
+  = false` for the same reason, even though `wezterm` isn't in the pacman
+  stow list — the file is still shared with the Debian/i3 path and still
+  gets run manually on this machine.
+- **This reintroduces an XWayland dependency**, reversing the "no XWayland
+  dependency anywhere" state recorded in the final-review amendments (Rofi
+  was already native-Wayland; Chrome and wezterm are now deliberately routed
+  through XWayland instead).
+- **Revert trigger:** re-run the repro (`google-chrome-stable` /
+  `wezterm-gui start -- true` with no ozone/wayland override) whenever
+  `wayland` or `wlroots0.20` next appear in a `pacman -Syu` upgrade list —
+  those are the only two packages implicated. If it no longer crashes,
+  remove the three changes above.

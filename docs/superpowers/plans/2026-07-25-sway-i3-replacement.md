@@ -669,3 +669,52 @@ cd -
 ```
 
 - [ ] **Step 5: Report back** — summarize what worked out of the box vs. what needed adjustment, so the env-install repo's spec doc can be updated if any Sway/wlroots behavior differed from what was assumed during design.
+
+---
+
+## Amendments from on-hardware validation (Task 9) and final review
+
+Task 1's package list and Task 4's embedded config content above are the
+plan as originally written — they no longer match what's actually in
+`env-install.sh` / `~/dotfiles/sway/.config/sway/config` after Task 9's
+on-hardware fixes and the final review's fix wave. Rather than editing the
+historical task content in place, the deltas are recorded here:
+
+- **Package list (pacman branch):** `wezterm` is removed (dropped from both
+  the install list and the `stow -R` line — it crashes under Sway, see
+  below, and `kitty` is now the default terminal instead). `mako` and
+  `polkit-gnome` are added (notification daemon + polkit agent, needed by
+  `wg_toggle.sh`'s `notify-send` and `nm-applet`'s auth prompts in a
+  standalone Sway session). `network-manager-applet` and `sysstat` were
+  already added post-Task-9 (commit `3daf6a0`) to **both** distros — an
+  intentional, user-approved exception to this plan's "Debian path
+  unchanged" constraint, since the gap (empty tray, broken i3blocks `[cpu]`
+  block) was a pre-existing bug on both distros, not Sway-specific.
+- **Terminal:** `kitty`, not `wezterm` (Task 4's embedded config) or
+  `alacritty` (Task 9's interim fix). `wezterm-gui` reliably SIGABRTs on
+  first Wayland connection under Sway (known upstream wezterm/wlroots
+  issue). Task 9 moved to `alacritty` as a quick fix, but `alacritty` was
+  never added to the install/stow lists on either distro; the final review
+  resolved this by moving to `kitty`, which was already fully installed and
+  stowed on both branches.
+- **Bar:** single bar with no hardcoded `output` line (auto-detects all
+  connected outputs), not the two hardcoded-output bars (`DP-1.1`/`HDMI-0`/
+  `primary` and `DP-3`) in Task 4's embedded config — those output names
+  didn't exist on the real hardware (`HDMI-A-1`, single monitor).
+- **Rofi:** confirmed native-Wayland as of rofi 2.0.0 (already the installed
+  version) — no XWayland dependency, contrary to the "runs via Sway's
+  built-in XWayland support" assumption in the original design.
+- **Chrome:** `$mod+c` now runs `google-chrome --ozone-platform-hint=auto`
+  (forces native Wayland rendering) so it doesn't depend on XWayland, which
+  Sway's Arch package does not pull in by default.
+- **New in the final review/user requests, not in the original plan:**
+  `for_window [app_id="org.gnome.Calculator"] floating enable` (added
+  alongside the existing `class` rule — `class` only matches XWayland
+  windows); dead `$mod+Shift+r restart` binding removed (not a real Sway
+  command); dead `$refresh_i3status`/`killall -SIGUSR1 i3status` machinery
+  removed from the four `XF86Audio...` bindings (targeted `i3status`, which
+  isn't used — the bar's `status_command` is `i3blocks`); a visible focus
+  border added (`default_border pixel 2` + a `client.*` color block using a
+  new Catppuccin Frappe green `$color_focus_border #a6d189`); `swayfx`
+  (corner-radius/blur Sway fork) was considered for rounded corners and
+  explicitly declined by the user in favor of staying on vanilla Sway.

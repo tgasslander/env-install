@@ -144,3 +144,73 @@ No automated test suite exists for this repo (per `CLAUDE.md`); validation is
 `bash -n` on any shell script and `shellcheck` where available, plus the
 on-hardware manual check described above. This matches the existing
 project convention.
+
+## Amendments from on-hardware validation (Task 9) and final review
+
+On-hardware testing (Task 9) and a final whole-branch review surfaced several
+places where this spec no longer matched what was actually built. Rather than
+rewriting the sections above, this section records the deltas:
+
+- **Terminal is `kitty`, not `wezterm`.** `wezterm-gui` reliably SIGABRTs on
+  first Wayland connection under Sway (`wl_display_dispatch_queue_pending`
+  fatal abort — known multi-year upstream wezterm/wlroots issue, see the SDD
+  progress ledger). Task 9 first moved `$mod+Return`/`$mod+w` to `alacritty`
+  as a quick fix, but `alacritty` was never added to `env-install.sh`'s
+  install/stow lists on either distro. The final review resolved this by
+  switching to `kitty` instead — already fully installed and stowed on both
+  the apt and pacman branches. `wezterm` is dropped from the pacman
+  package/stow lists entirely (Debian keeps it, unused by Sway).
+- **Single auto-detecting bar, not two hardcoded-output bars.** The bar/output
+  names in the original translation table (`DP-1.1`, `HDMI-0`, `DP-3`,
+  `DP-1.2`) didn't match this machine's real wlroots output name
+  (`HDMI-A-1`, single monitor) — the bar existed but had nothing to attach
+  to. Fixed by collapsing to one `bar {}` block with no hardcoded `output`
+  line (shows on every connected output automatically) and dropping the
+  workspace-output pins and `exec_always swaymsg output ... disable` lines.
+- **Rofi is native-Wayland out of the box, no XWayland needed.** The spec
+  above assumed rofi ran via Sway's built-in XWayland support. On-hardware
+  testing found Wayland support was merged into rofi mainline as of 2.0.0
+  (the AUR `rofi-wayland` fork was removed upstream for this reason), and
+  that's the version already installed here (`rofi -help` confirms
+  `wayland: selected`). No config/package change was needed, and — combined
+  with the other changes below — the final setup has no XWayland dependency
+  anywhere.
+- **`google-chrome` launches with `--ozone-platform-hint=auto`.** Chrome
+  defaults to X11/XWayland rendering on Linux; this flag forces native
+  Wayland rendering instead. This avoids depending on `xorg-xwayland`, which
+  Sway's Arch package does not pull in at all (confirmed: it was only
+  present on the test machine because Plasma requires it).
+- **`mako` + `polkit-gnome` added.** `wg_toggle.sh` uses `notify-send` and
+  `nm-applet` needs a polkit authentication agent to modify network
+  connections; neither had anything to talk to in a standalone Sway session
+  (both silently worked during testing only because Plasma was also
+  installed on the test machine). Added `mako` (Sway's standard notification
+  daemon) and `polkit-gnome` (lightweight; deliberately not
+  `polkit-kde-agent` or `lxqt-policykit`, which pull in more) to the pacman
+  package list, plus `exec --no-startup-id` lines for both in the config.
+- **`network-manager-applet`/`network-manager-gnome` + `sysstat` added to
+  *both* distros.** `nm-applet` and `mpstat` are referenced by the shared
+  i3blocks config (tray icon, `[cpu]` block) but were never installed by
+  either package-manager branch — the tray was empty and the cpu block was
+  broken on both. This is an intentional, confirmed exception to this spec's
+  "Debian/apt install path must not change at all" scope constraint: the
+  fix is a pre-existing bug unrelated to the Sway migration, and the user
+  approved applying it to both distros rather than leaving Debian broken.
+- **Focused-window border color added.** `default_border pixel 0` was
+  carried over unchanged from the old i3 config (where it was also never
+  configured), so there was no visible focus indicator. Changed to
+  `default_border pixel 2` and added a `client.*` border-color block using
+  a new `$color_focus_border #a6d189` (Catppuccin Frappe green, matching
+  the palette already in use: `$color_highlight` is Frappe blue,
+  `$color_non_focused_foreground` is Frappe lavender,
+  `$color_urgent_foreground` is Frappe red).
+- **Rounded corners considered, explicitly declined.** `swayfx` (a Sway fork
+  with corner-radius/blur support) was discussed with the user and declined
+  in favor of staying on vanilla Sway, which has no native support for
+  corner radius. Not a gap — a deliberate choice.
+- **`for_window` needs both a `class` and an `app_id` rule.** `class`
+  criteria only match XWayland windows; native Sway/Wayland apps (e.g.
+  GNOME Calculator) use `app_id` instead. Added
+  `for_window [app_id="org.gnome.Calculator"] floating enable` alongside the
+  existing `class="Gnome-calculator"` rule (harmless if the app ever runs
+  under XWayland).

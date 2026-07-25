@@ -13,7 +13,8 @@
 - Debian/apt install path must not change at all (per spec: "Out of scope: Any change to the Debian/apt install path").
 - No automated test suite exists for either repo; validation is `bash -n` (and `shellcheck` where available) for scripts, per this repo's `CLAUDE.md`, plus `sway --validate` for the Sway config and a manual on-hardware checklist for anything hardware-dependent (per the spec's Validation Plan).
 - Do not push `~/dotfiles` commits to its remote without separate confirmation (per spec decision).
-- Multi-monitor output names (`DP-1.1`, `HDMI-0`, `DP-3`, `DP-1.2`) and the DPMS/monitor-kick hacks are explicitly best-effort translations flagged with `VERIFY` comments — do not treat them as done until checked against `swaymsg -t get_outputs` on real hardware (per spec decision).
+- Multi-monitor output names (`DP-1.1`, `HDMI-0`, `DP-3`, `DP-1.2`) used in the bar/workspace config are best-effort translations flagged with `VERIFY` comments — do not treat them as done until checked against `swaymsg -t get_outputs` on real hardware (per spec decision).
+- **Scope change (mid-execution):** the DPMS/monitor-kick workaround scripts (`dpms-hdmi-fix.sh`, `kick_hdmi.sh`, `thunderbolt.sh`, `toga_screens_office.sh`) and their keybindings are dropped entirely, not ported — they're one-off hacks for the flaky dock/HDMI setup on this specific machine and aren't expected to be needed elsewhere. This superseded the original spec's "best-effort translate now" decision for these four scripts; the original Task 6 that ported them is cancelled.
 
 ---
 
@@ -27,10 +28,6 @@
 - Create: `sway/.config/sway/config` — core Sway config, ported from `i3/.config/i3/config`
 - Create: `sway/.config/sway/exit.sh` — ported from `i3/.config/i3/i3exit.sh`
 - Create: `sway/.config/sway/lockscreen.png` — copy of `i3/.config/i3/lockscreen.png`
-- Create: `sway/.config/sway/dpms-hdmi-fix.sh` — ported from `i3/.config/i3/dpms-hdmi-fix.sh`
-- Create: `sway/.config/sway/scripts/kick_hdmi.sh` — ported from `i3/.config/i3/scripts/kick_hdmi.sh`
-- Create: `sway/.config/sway/scripts/thunderbolt.sh` — ported from `i3/.config/i3/scripts/thunderbolt.sh`
-- Create: `sway/.config/sway/scripts/toga_screens_office.sh` — ported from `i3/.config/i3/scripts/toga_screens_office.sh`
 - Create: `sway/.config/sway/scripts/toggle_keyboard_layout.sh` — ported from `i3/.config/i3/scripts/toggle_keyboard_layout.sh`
 - Create: `sway/.config/sway/scripts/wg_toggle.sh` — unchanged copy of `i3/.config/i3/scripts/wg_toggle.sh` (no X11 dependency)
 
@@ -216,7 +213,7 @@ The core Sway config, ported from `~/dotfiles/i3/.config/i3/config`. Same gaps/m
 - Create: `~/dotfiles/sway/.config/sway/config`
 
 **Interfaces:**
-- Consumes: `~/.config/sway/exit.sh` (Task 5), `~/.config/sway/dpms-hdmi-fix.sh` (Task 6), `~/.config/sway/scripts/{kick_hdmi,thunderbolt,toga_screens_office,toggle_keyboard_layout,wg_toggle}.sh` (Tasks 6-7), `~/.config/sway/lockscreen.png` (Task 5) — this task references all of them by path but they don't need to exist yet for this task's own verification step.
+- Consumes: `~/.config/sway/exit.sh` (Task 5), `~/.config/sway/scripts/{toggle_keyboard_layout,wg_toggle}.sh` (Task 7), `~/.config/sway/lockscreen.png` (Task 5) — this task references all of them by path but they don't need to exist yet for this task's own verification step.
 - Produces: the `$mod` keybindings, workspace numbers `$ws1`-`$ws10`, and `mode "$system"` / `mode "resize"` names, unchanged from the i3 config, for consistency with muscle memory.
 
 - [ ] **Step 1: Create the file**
@@ -248,13 +245,11 @@ font pango:monospace 8
 
 # swayidle+swaylock replaces xss-lock+i3lock. The original config had no
 # idle-timeout lock at all — both its xss-lock lines used
-# --transfer-sleep-lock (suspend-only), and the second one chained
-# kick_hdmi.sh to run right after unlock. This merges that into one
-# swayidle before-sleep hook (running two competing xss-lock/swayidle
-# instances for the same inhibitor was likely an unintentional duplicate
-# in the original, not a second distinct behavior).
+# --transfer-sleep-lock (suspend-only); the second one also chained a
+# kick_hdmi.sh HDMI-wake hack, which is dropped here (machine-specific,
+# not ported — see Global Constraints).
 exec swayidle -w \
-	before-sleep 'swaylock -f -i ~/.config/sway/lockscreen.png; ~/.config/sway/scripts/kick_hdmi.sh'
+	before-sleep 'swaylock -f -i ~/.config/sway/lockscreen.png'
 
 # NetworkManager tray icon. Sway's bar has native tray support (unlike
 # i3bar), see `tray_output` in the bar {} blocks below.
@@ -423,9 +418,6 @@ workspace 3 output primary
 exec_always swaymsg output DP-1.1 disable
 exec_always swaymsg output DP-1.2 disable
 
-# attempt to kick the HDMI monitor
-exec ~/.config/sway/dpms-hdmi-fix.sh
-
 # VERIFY: feh originally assigned the first --bg-scale image to the first
 # RandR output and the second to the second, in xrandr detection order.
 # This assumes the first wallpaper is the general/default one and the
@@ -434,13 +426,6 @@ output * bg /home/toga/.local/share/wallpapers/4K\ No\ Logo\ PL\ 1824.png fill
 output DP-3 bg /home/toga/Pictures/Nature\ Nature\ 029\ 4K.png fill
 
 bindsym $mod+c exec google-chrome
-bindsym $mod+m exec ~/.config/sway/scripts/toga_screens_office.sh
-# VERIFY: `xrandr --fb WxH` resized the whole virtual screen framebuffer,
-# which has no exact Wayland equivalent (wlroots has no single shared
-# framebuffer concept). This forces DP-3 to a matching resolution instead,
-# which was probably the original intent — adjust if not.
-bindsym $mod+shift+m exec wlr-randr --output DP-3 --custom-mode 3840x2160
-bindsym $mod+n exec ~/.config/sway/scripts/thunderbolt.sh
 default_border pixel 0
 
 set $system system (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
@@ -476,8 +461,10 @@ Add sway config, ported from the i3 config
 Same keybindings/workspaces/gaps/bar as i3; X11-specific bits
 (picom, xss-lock+i3lock, feh, xbacklight, xrandr) replaced with
 swayidle+swaylock, native `output ... bg`, brightnessctl, and
-wlr-randr/swaymsg respectively. Output names and the DPMS/monitor-kick
-workarounds are flagged VERIFY pending on-hardware testing.
+swaymsg respectively. Output names are flagged VERIFY pending
+on-hardware testing. The old dpms-hdmi-fix/kick_hdmi/thunderbolt/
+toga_screens_office hacks and their keybindings are dropped, not
+ported — machine-specific, not needed elsewhere.
 EOF
 )"
 cd -
@@ -553,139 +540,13 @@ cd -
 
 ---
 
-### Task 6: Port the monitor-hack scripts to `wlr-randr`
+### Task 6: CANCELLED — monitor-hack scripts dropped, not ported
 
-Ports `dpms-hdmi-fix.sh`, `kick_hdmi.sh`, `thunderbolt.sh`, `toga_screens_office.sh` per the spec's "best-effort translate now" decision. All four are flagged `VERIFY` since output names and the underlying need for the hack can only be confirmed on real hardware.
+**Decision (mid-execution scope change):** `dpms-hdmi-fix.sh`, `kick_hdmi.sh`, `thunderbolt.sh`, and `toga_screens_office.sh` are one-off workarounds for the flaky HDMI/dock setup on this specific machine, and aren't expected to be needed on any other machine this dotfiles repo gets stowed on. Rather than porting them to `wlr-randr` (superseding the original spec's "best-effort translate now" decision for these four scripts), they're dropped entirely from the `sway` package, along with their keybindings (`$mod+m`, `$mod+shift+m`, `$mod+n`) and the `kick_hdmi.sh` chain in `swayidle`'s `before-sleep` hook — see the updated Task 4 content above, which no longer references any of these.
 
-**Files:**
-- Create: `~/dotfiles/sway/.config/sway/dpms-hdmi-fix.sh`
-- Create: `~/dotfiles/sway/.config/sway/scripts/kick_hdmi.sh`
-- Create: `~/dotfiles/sway/.config/sway/scripts/thunderbolt.sh`
-- Create: `~/dotfiles/sway/.config/sway/scripts/toga_screens_office.sh`
+They remain untouched in `~/dotfiles/i3/.config/i3/` and `i3/.config/i3/scripts/` for the Debian/i3 path, which is unaffected by this change.
 
-**Interfaces:**
-- Consumes: nothing
-- Produces: `~/.config/sway/dpms-hdmi-fix.sh` (referenced by Task 4's `exec` line), `~/.config/sway/scripts/kick_hdmi.sh` (chained after `swaylock` in Task 4's `swayidle before-sleep` hook, matching the original config's `xss-lock ... 'i3lock --nofork; ~/.../kick_hdmi.sh'` line), `~/.config/sway/scripts/thunderbolt.sh` / `toga_screens_office.sh` (referenced by Task 4's `$mod+n`/`$mod+m` bindings).
-
-- [ ] **Step 1: Write `dpms-hdmi-fix.sh`**
-
-```bash
-#!/bin/bash
-# Re-probe HDMI when DPMS wakes the display.
-#
-# Ported from the xset/xrandr version. wlroots has no `xset q` equivalent
-# for global monitor power state; this polls swaymsg's per-output `dpms`
-# field instead.
-#
-# VERIFY: confirm `swaymsg -t get_outputs | jq` on this hardware actually
-# reports a `dpms` boolean for HDMI-0 the way this script assumes — not all
-# wlroots compositors expose DPMS state identically, and this whole
-# workaround may turn out to be unnecessary under Sway (wlroots handles
-# hotplug/DPMS differently than X11 RandR did).
-
-HDMI_OUTPUT="HDMI-0"
-
-was_off=0
-while true; do
-	state=$(swaymsg -t get_outputs | jq -r --arg out "$HDMI_OUTPUT" '.[] | select(.name == $out) | .dpms')
-	case "$state" in
-		false) was_off=1 ;;
-		true)
-			if [ "$was_off" = "1" ]; then
-				was_off=0
-				sleep 1
-				wlr-randr --output "$HDMI_OUTPUT" --on
-			fi
-			;;
-	esac
-	sleep 2
-done
-```
-
-- [ ] **Step 2: Write `scripts/kick_hdmi.sh`**
-
-```bash
-#!/bin/bash
-# VERIFY: output-name detection assumes wlr-randr lists connected HDMI
-# outputs with names starting "HDMI", the way `xrandr | grep connected`
-# did for the X11 names — confirm against `wlr-randr` on this hardware.
-echo "Kick script triggered at $(date)" >> /tmp/hdmi_kick.log
-
-MON=$(wlr-randr | grep -E '^HDMI' | head -n1 | awk '{print $1}')
-
-if [ -z "$MON" ]; then
-    echo "Error: HDMI monitor not detected by wlr-randr" >> /tmp/hdmi_kick.log
-    exit 1
-fi
-
-notify-send "HDMI Kick" "Attempting to wake $MON..."
-
-wlr-randr --output "$MON" --custom-mode 1920x1080
-sleep 0.5
-wlr-randr --output "$MON" --custom-mode 3840x2160
-```
-
-- [ ] **Step 3: Write `scripts/thunderbolt.sh`**
-
-```bash
-#!/bin/bash
-# VERIFY: wlr-randr has no --auto/--right-of convenience flags like xrandr —
-# positions are explicit pixel offsets, and output names may differ from
-# the X11 RandR names below. Confirm DP-3's actual resolution and DP-1.1's
-# real output name via `swaymsg -t get_outputs`, then fix the --pos value
-# (currently assumes DP-3 is 3840px wide, placing DP-1.1 at x=3840,y=0 to
-# sit to its right, matching the old --right-of DP-3).
-wlr-randr --output DP-1.1 --custom-mode 1920x1080 && \
-sleep 5 && \
-wlr-randr --output DP-3 --custom-mode 3840x2160 && \
-wlr-randr --output DP-1.1 --custom-mode 1920x1080 --pos 3840,0
-```
-
-- [ ] **Step 4: Write `scripts/toga_screens_office.sh`**
-
-```bash
-#!/bin/bash
-# VERIFY: see thunderbolt.sh — same --auto/--right-of caveat, same
-# assumption that DP-3 is 3840px wide.
-wlr-randr --output HDMI-0 --custom-mode 1920x1080 && \
-sleep 5 && \
-wlr-randr --output DP-3 --custom-mode 3840x2160 && \
-wlr-randr --output HDMI-0 --custom-mode 1920x1080 --pos 3840,0
-```
-
-- [ ] **Step 5: Make executable and verify syntax**
-
-```bash
-chmod +x ~/dotfiles/sway/.config/sway/dpms-hdmi-fix.sh \
-	~/dotfiles/sway/.config/sway/scripts/kick_hdmi.sh \
-	~/dotfiles/sway/.config/sway/scripts/thunderbolt.sh \
-	~/dotfiles/sway/.config/sway/scripts/toga_screens_office.sh
-
-for f in ~/dotfiles/sway/.config/sway/dpms-hdmi-fix.sh \
-	~/dotfiles/sway/.config/sway/scripts/kick_hdmi.sh \
-	~/dotfiles/sway/.config/sway/scripts/thunderbolt.sh \
-	~/dotfiles/sway/.config/sway/scripts/toga_screens_office.sh; do
-	bash -n "$f" && echo "OK: $f"
-done
-```
-Expected: `OK: <path>` for all four, no syntax errors.
-
-- [ ] **Step 6: Commit**
-
-```bash
-cd ~/dotfiles
-git add sway/.config/sway/dpms-hdmi-fix.sh sway/.config/sway/scripts/kick_hdmi.sh \
-	sway/.config/sway/scripts/thunderbolt.sh sway/.config/sway/scripts/toga_screens_office.sh
-git commit -m "$(cat <<'EOF'
-Port monitor-kick/DPMS workaround scripts to wlr-randr
-
-Best-effort translation of xrandr/xset hacks for a flaky HDMI/dock
-setup. Output names and whether these are still needed at all under
-wlroots are flagged VERIFY pending testing on real hardware.
-EOF
-)"
-cd -
-```
+No files are created by this task. If an earlier dispatch already created any of `sway/.config/sway/dpms-hdmi-fix.sh`, `sway/.config/sway/scripts/kick_hdmi.sh`, `sway/.config/sway/scripts/thunderbolt.sh`, `sway/.config/sway/scripts/toga_screens_office.sh` before this cancellation, remove them and any commit that added them.
 
 ---
 
@@ -761,7 +622,7 @@ cd -
 - [ ] **Step 2: Confirm the symlinks landed correctly**
 
 ```bash
-ls -la ~/.config/sway/config ~/.config/sway/exit.sh ~/.config/sway/dpms-hdmi-fix.sh \
+ls -la ~/.config/sway/config ~/.config/sway/exit.sh \
 	~/.config/sway/lockscreen.png ~/.config/sway/scripts/
 ```
 Expected: every path is a symlink (`l...` in the `ls -la` listing) pointing into `~/dotfiles/sway/...`, and `~/.config/i3` / `~/.config/picom.conf` are gone (no longer symlinked).
@@ -782,27 +643,25 @@ Expected: file exists (shipped by the `sway` package itself — no work needed t
 
 ### Task 9: Manual on-hardware validation
 
-This task is inherently manual — the multi-monitor output names and DPMS/monitor-kick behavior can only be confirmed by actually logging into Sway on this hardware, per the spec's Validation Plan. Do this task interactively with the user, not unattended.
+This task is inherently manual — the multi-monitor output names can only be confirmed by actually logging into Sway on this hardware, per the spec's Validation Plan. Do this task interactively with the user, not unattended.
 
 - [ ] **Step 1: Log into the Sway session** from the login greeter (`plasmalogin`), selecting "Sway".
 
 - [ ] **Step 2: Check real output names**
 
 Run inside the Sway session: `swaymsg -t get_outputs | jq '.[] | {name, active}'`
-Compare the `name` values against `DP-1.1`, `HDMI-0`, `DP-3`, `DP-1.2` used throughout `sway/.config/sway/config` and the Task 6 scripts. Fix every mismatch.
+Compare the `name` values against `DP-1.1`, `HDMI-0`, `DP-3`, `DP-1.2` used in `sway/.config/sway/config`'s bar/workspace/output blocks. Fix every mismatch.
 
 - [ ] **Step 3: Confirm core behavior**
   - Keybindings: focus/move/split/resize/workspace switches match old i3 muscle memory.
   - Bar: `i3blocks` renders in the Sway bar, both `bar {}` blocks show on the right outputs, NetworkManager tray icon appears (`tray_output`).
-  - Lock/idle: `swayidle` locks the screen after 10 minutes; `$mod+Shift+q` → `l` locks immediately via `exit.sh`.
+  - Lock/idle: `swayidle` locks the screen before sleep; `$mod+Shift+q` → `l` locks immediately via `exit.sh`.
   - Brightness keys adjust brightness via `brightnessctl`.
   - `$mod+space` / `$mod+d` open rofi (via XWayland) with the existing catppuccin theme.
   - `$mod+i` toggles keyboard layout; the `lang` block in the bar updates.
   - Wallpapers appear on the right outputs (fix the `output ... bg` lines in Task 4's config if swapped).
 
-- [ ] **Step 4: Exercise the monitor-kick scripts** (`$mod+m`, `$mod+n`, the DPMS wake case) if the hardware setup they target is available; fix the `--pos`/`--custom-mode`/output-name values in Task 6's scripts based on what actually happens.
-
-- [ ] **Step 5: Commit any on-hardware fixes**
+- [ ] **Step 4: Commit any on-hardware fixes**
 
 ```bash
 cd ~/dotfiles
@@ -811,4 +670,4 @@ git commit -m "Fix sway output names/positions based on real hardware (swaymsg -
 cd -
 ```
 
-- [ ] **Step 6: Report back** — summarize what worked out of the box vs. what needed adjustment, so the env-install repo's spec doc can be updated if any Sway/wlroots behavior differed from what was assumed during design.
+- [ ] **Step 5: Report back** — summarize what worked out of the box vs. what needed adjustment, so the env-install repo's spec doc can be updated if any Sway/wlroots behavior differed from what was assumed during design.

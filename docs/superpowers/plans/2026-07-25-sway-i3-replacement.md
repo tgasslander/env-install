@@ -418,12 +418,10 @@ workspace 3 output primary
 exec_always swaymsg output DP-1.1 disable
 exec_always swaymsg output DP-1.2 disable
 
-# VERIFY: feh originally assigned the first --bg-scale image to the first
-# RandR output and the second to the second, in xrandr detection order.
-# This assumes the first wallpaper is the general/default one and the
-# second belongs specifically to DP-3 — swap/adjust if that's backwards.
-output * bg /home/toga/.local/share/wallpapers/4K\ No\ Logo\ PL\ 1824.png fill
-output DP-3 bg /home/toga/Pictures/Nature\ Nature\ 029\ 4K.png fill
+# Standard Sway default wallpaper (shipped by the sway package itself),
+# used on all outputs — avoids depending on user-specific image files that
+# only existed on a previous machine.
+output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
 
 bindsym $mod+c exec google-chrome
 default_border pixel 0
@@ -659,7 +657,7 @@ Compare the `name` values against `DP-1.1`, `HDMI-0`, `DP-3`, `DP-1.2` used in `
   - Brightness keys adjust brightness via `brightnessctl`.
   - `$mod+space` / `$mod+d` open rofi (via XWayland) with the existing catppuccin theme.
   - `$mod+i` toggles keyboard layout; the `lang` block in the bar updates.
-  - Wallpapers appear on the right outputs (fix the `output ... bg` lines in Task 4's config if swapped).
+  - Sway's standard default wallpaper appears on all outputs (the config was switched away from machine-specific image paths — see the wallpaper-fix commit after Task 8).
 
 - [ ] **Step 4: Commit any on-hardware fixes**
 

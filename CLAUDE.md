@@ -16,7 +16,7 @@ A set of Bash scripts that bootstrap a personal Linux dev environment from scrat
 ./env-install.sh          # full bootstrap; run from repo root, not via sudo
 ```
 
-The script is idempotent: reruns `git pull` instead of re-cloning `~/dotfiles`, skip oh-my-zsh/font install if already present, `stow -R` re-links without erroring, and `~/.zshrc` is only backed up once (guarded so a rerun never clobbers an existing `~/.zshrc.bak`). There is no lint or test suite; validate changes with `bash -n <file>` (syntax) and `shellcheck` if available.
+The script is idempotent: reruns `git pull` instead of re-cloning `~/dotfiles`, skip oh-my-zsh/font install if already present, `stow -R` re-links without erroring, and `~/.zshrc` is only backed up once (guarded so a rerun never clobbers an existing `~/.zshrc.bak`). There is no lint or test suite; validate changes with `bash -n <file>` (syntax), `shellcheck` and `shfmt -d` (both are installed by the bootstrap itself).
 
 ## Architecture
 

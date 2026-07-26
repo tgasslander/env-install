@@ -20,6 +20,7 @@ if [ "$PKG_MGR" = "apt" ]; then
 		zsh tmux stow feh curl clang htop \
 		i3 i3blocks i3lock vim \
 		build-essential python3-venv \
+		shellcheck shfmt \
 		picom wezterm snapd wget rofi unzip \
 		network-manager-gnome sysstat \
 		postgresql-client
@@ -32,6 +33,7 @@ else
 		sway swaylock swayidle swaybg brightnessctl wlr-randr jq \
 		i3blocks vim \
 		base-devel python \
+		shellcheck shfmt \
 		wget rofi unzip \
 		network-manager-applet sysstat mako polkit-gnome \
 		kubectl k9s kubectx postgresql-libs

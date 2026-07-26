@@ -8,7 +8,7 @@ Be concise in your answers.
 
 ## What this is
 
-A set of Bash scripts that bootstrap a personal Linux dev environment from scratch: terminal emulators (WezTerm, kitty), window manager (i3 + i3blocks/i3lock/picom/rofi/feh), shell (zsh + oh-my-zsh + starship), editor (Neovim), Hack Nerd Font, tmux, GNU stow, and language toolchains (node via nvm, Go via snap). It clones the user's dotfiles repo and applies them with `stow`.
+A set of Bash scripts that bootstrap a personal Linux dev environment from scratch: terminal emulators (WezTerm, kitty), window manager (i3 + i3blocks/i3lock/picom/rofi/feh), shell (zsh + oh-my-zsh + starship), editor (Neovim), Hack Nerd Font, tmux, GNU stow, language toolchains (node via nvm, Go via snap), and Kubernetes/DB CLI tooling (kubectl, k9s, kubectx/kubens, the psql client). It clones the user's dotfiles repo and applies them with `stow`.
 
 ## Running
 
@@ -20,8 +20,8 @@ The script is idempotent: reruns `git pull` instead of re-cloning `~/dotfiles`, 
 
 ## Architecture
 
-- `env-install.sh` is the **orchestrator**. It runs package installs itself, then pulls in each `*.inc` file for a specific component. The `.inc` files are plain Bash sourced or executed from the orchestrator, not a plugin system — order matters (fonts → i3 → nvm → dotfiles → zsh → nvim → oh-my-zsh → stow zsh → starship → node → go).
-- `.inc` files are invoked inconsistently: some with `source` (`i3.inc`, `zsh.inc`, `nvim.inc`, `oh-my-zsh.inc`, `starship.inc`) and one by execution (`./fonts.inc`). `source` runs in the current shell (env changes persist, `cd` leaks); execution runs in a subshell. Preserve the existing mechanism for a given step unless intentionally changing it, since some steps rely on shared state (e.g. nvm/node).
+- `env-install.sh` is the **orchestrator**. It runs package installs itself, then pulls in each `*.inc` file for a specific component. The `.inc` files are plain Bash sourced or executed from the orchestrator, not a plugin system — order matters (k8s → fonts → i3 → nvm → dotfiles → zsh → nvim → oh-my-zsh → stow zsh → starship → node → go).
+- `.inc` files are invoked inconsistently: some with `source` (`i3.inc`, `zsh.inc`, `nvim.inc`, `oh-my-zsh.inc`, `starship.inc`) and two by execution (`./fonts.inc`, `./k8s.inc`). `source` runs in the current shell (env changes persist, `cd` leaks); execution runs in a subshell. Preserve the existing mechanism for a given step unless intentionally changing it, since some steps rely on shared state (e.g. nvm/node).
 - Step ordering has real dependencies: `nvim.inc` runs `npm install --global yarn`, so `nvm install node` must run first (it does, right after nvm itself is installed); `stow` steps require `~/dotfiles` to already be cloned; `starship.inc` assumes the zsh + oh-my-zsh + stowed `.zshrc` chain completed. The script never sources `~/.zshrc` itself (it's zsh syntax, and the script runs under bash) — it just prints a reminder to open a new shell.
 
 ## Cross-platform goal (Debian + Arch)

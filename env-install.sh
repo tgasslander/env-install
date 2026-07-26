@@ -21,7 +21,8 @@ if [ "$PKG_MGR" = "apt" ]; then
 		i3 i3blocks i3lock vim \
 		build-essential python3-venv \
 		picom wezterm snapd wget rofi unzip \
-		network-manager-gnome sysstat
+		network-manager-gnome sysstat \
+		postgresql-client
 else
 	# Sway replaces i3+X11+picom on Arch: it's Wayland-native (no xorg-server
 	# needed at all) and deliberately i3-config-compatible. See
@@ -32,7 +33,8 @@ else
 		i3blocks vim \
 		base-devel python \
 		wget rofi unzip \
-		network-manager-applet sysstat mako polkit-gnome
+		network-manager-applet sysstat mako polkit-gnome \
+		kubectl k9s kubectx postgresql-libs
 fi
 
 echo "Installing kitty"
@@ -44,6 +46,12 @@ if [ "$PKG_MGR" = "apt" ]; then
 else
 	pkg_install kitty
 fi
+
+echo "Kubernetes tooling"
+echo
+# Executed, not sourced: nothing here needs to leak into the parent shell.
+# No-op on Arch, where these are native packages installed above.
+./k8s.inc
 
 echo "Hack font"
 echo

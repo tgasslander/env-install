@@ -66,7 +66,9 @@ on it, so this placement is purely about grouping container tooling together.
 
 ### Debian path (`PKG_MGR = apt`)
 
-1. If `docker` is already on `PATH`, print a skip message and exit 0.
+1. If `docker` is already on `PATH`, print a skip message and return 0 from
+   `install_docker_apt`, falling through to the shared post-install block
+   (docker group, `usermod`, `systemctl enable --now docker`) below.
 2. Install prerequisites: `sudo apt install -y ca-certificates curl` (both are
    typically present already, so `-y` makes this a no-op). Note this calls
    `apt` directly rather than `common.inc`'s `pkg_install`: `docker.inc` is

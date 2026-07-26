@@ -36,7 +36,8 @@ else
 		shellcheck shfmt \
 		wget rofi unzip \
 		network-manager-applet sysstat mako polkit-gnome \
-		kubectl k9s kubectx postgresql-libs
+		kubectl k9s kubectx postgresql-libs \
+		docker docker-compose docker-buildx
 fi
 
 echo "Installing kitty"
@@ -54,6 +55,13 @@ echo
 # Executed, not sourced: nothing here needs to leak into the parent shell.
 # No-op on Arch, where these are native packages installed above.
 ./k8s.inc
+
+echo "Docker"
+echo
+# Executed, not sourced: nothing here needs to leak into the parent shell.
+# On Arch the packages come from the list above; this still does the group
+# and daemon setup on both distros.
+./docker.inc
 
 echo "Hack font"
 echo

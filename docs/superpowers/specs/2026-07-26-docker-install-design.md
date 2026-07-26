@@ -67,24 +67,30 @@ on it, so this placement is purely about grouping container tooling together.
 ### Debian path (`PKG_MGR = apt`)
 
 1. If `docker` is already on `PATH`, print a skip message and exit 0.
-2. Install prerequisites: `ca-certificates`, `curl` (via `pkg_install`; both
-   are typically present already, `--needed`/`-y` semantics make this a
-   no-op).
+2. Install prerequisites: `sudo apt install -y ca-certificates curl` (both are
+   typically present already, so `-y` makes this a no-op). Note this calls
+   `apt` directly rather than `common.inc`'s `pkg_install`: `docker.inc` is
+   executed, not sourced, so it inherits the exported `PKG_MGR` but not the
+   shell functions. `k8s.inc` has the same constraint and does the same
+   thing.
 3. Resolve the repo flavor from `/etc/os-release`: `ubuntu` when `ID=ubuntu`
    or `ID_LIKE` contains `ubuntu`, otherwise `debian`. This makes derivative
    distros (Mint, Pop!_OS) resolve to the Ubuntu repo instead of 404ing on a
    nonexistent Debian suite.
-4. Resolve the suite: `VERSION_CODENAME` from `/etc/os-release`, falling back
-   to `UBUNTU_CODENAME` (derivatives set their own `VERSION_CODENAME` but
-   carry the upstream Ubuntu one in `UBUNTU_CODENAME`). If neither is set,
-   print an error and exit non-zero rather than writing a broken sources file.
+4. Resolve the suite: `UBUNTU_CODENAME` from `/etc/os-release`, falling back
+   to `VERSION_CODENAME`. This order matters — derivatives put their own
+   release name in `VERSION_CODENAME` (Mint's `vanessa`, which is not a
+   Docker suite) and the upstream Ubuntu suite in `UBUNTU_CODENAME`
+   (`jammy`). Plain Ubuntu sets both to the same value; Debian sets only
+   `VERSION_CODENAME`. If neither is set, print an error and exit non-zero
+   rather than writing a broken sources file.
 5. Fetch `https://download.docker.com/linux/<flavor>/gpg` and dearmor it to
    `/usr/share/keyrings/docker.gpg` (`gpg --yes --dearmor`, so reruns
    overwrite cleanly).
 6. Write `/etc/apt/sources.list.d/docker.list`:
    `deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/<flavor> <suite> stable`
-7. `sudo apt update`, then install `docker-ce docker-ce-cli containerd.io
-   docker-buildx-plugin docker-compose-plugin`.
+7. `sudo apt update`, then `sudo apt install -y docker-ce docker-ce-cli
+   containerd.io docker-buildx-plugin docker-compose-plugin`.
 
 ### Arch path (`PKG_MGR = pacman`)
 

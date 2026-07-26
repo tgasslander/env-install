@@ -43,7 +43,7 @@ fi
 echo "Installing kitty"
 if [ "$PKG_MGR" = "apt" ]; then
 	curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin \
-	    launch=n
+		launch=n
 	mkdir -p ~/.local/bin
 	sudo ln -sf ~/.local/kitty.app/bin/kitty ~/.local/kitty.app/bin/kitten /usr/bin/
 else
@@ -67,7 +67,6 @@ echo "Hack font"
 echo
 ./fonts.inc
 
-
 echo "i3 sources"
 echo
 source i3.inc
@@ -77,7 +76,7 @@ PROFILE=/dev/null bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm
 
 echo "node.js"
 NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 nvm install node
 
 echo "dotfiles"
@@ -121,9 +120,9 @@ fi
 
 echo "zsh-autosuggestions and zsh-syntax-highlighting plugins"
 ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
-[ -d "${ZSH_CUSTOM}/plugins/zsh-autosuggestions" ] || \
+[ -d "${ZSH_CUSTOM}/plugins/zsh-autosuggestions" ] ||
 	git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM}/plugins/zsh-autosuggestions"
-[ -d "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting" ] || \
+[ -d "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting" ] ||
 	git clone https://github.com/zsh-users/zsh-syntax-highlighting "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting"
 
 # Back up a real ~/.zshrc once (e.g. the one oh-my-zsh just wrote), never

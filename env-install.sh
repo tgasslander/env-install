@@ -99,6 +99,19 @@ fi
 cd - || exit
 echo "stowed configs from dotfiles"
 
+echo "tmux plugins (TPM)"
+# tmux.conf's own auto-install ("run 'git clone ... && install_plugins'")
+# clones/installs asynchronously, then immediately sources tpm/tpm in the next
+# line, so it races itself on a fresh box and fails until tmux is restarted.
+# Do the clone + install synchronously here instead, before tmux ever runs.
+TMUX_TPM_DIR="${HOME}/.config/tmux/plugins/tpm"
+if [ -d "${TMUX_TPM_DIR}" ]; then
+	echo "TPM already installed, skipping clone"
+else
+	git clone https://github.com/tmux-plugins/tpm "${TMUX_TPM_DIR}"
+fi
+"${TMUX_TPM_DIR}/bin/install_plugins"
+
 echo "zsh"
 echo
 if [ "$(getent passwd "$USER" | cut -d: -f7)" != "$(command -v zsh)" ]; then

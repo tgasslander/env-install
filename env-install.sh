@@ -91,9 +91,9 @@ fi
 cd ~/dotfiles || exit
 # -R restows: idempotent, re-links without erroring on existing symlinks
 if [ "$PKG_MGR" = "apt" ]; then
-	stow -R i3 i3blocks nvim starship Xresources tmux kitty picom rofi wezterm
+	stow -R i3 i3blocks nvim starship Xresources tmux kitty picom rofi wezterm scripts
 else
-	stow -R sway i3blocks nvim starship Xresources tmux kitty rofi
+	stow -R sway i3blocks nvim starship Xresources tmux kitty rofi scripts
 fi
 cd - || exit
 echo "stowed configs from dotfiles"

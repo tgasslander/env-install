@@ -23,7 +23,7 @@ if [ "$PKG_MGR" = "apt" ]; then
 		shellcheck shfmt \
 		picom wezterm snapd wget rofi unzip \
 		network-manager-gnome sysstat \
-		postgresql-client
+		postgresql-client xclip
 else
 	# Sway replaces i3+X11+picom on Arch: it's Wayland-native (no xorg-server
 	# needed at all) and deliberately i3-config-compatible. See
@@ -37,7 +37,8 @@ else
 		wget rofi unzip \
 		network-manager-applet sysstat mako polkit-gnome \
 		kubectl k9s kubectx postgresql-libs \
-		docker docker-compose docker-buildx
+		docker docker-compose docker-buildx \
+		wl-clipboard
 fi
 
 echo "Installing kitty"

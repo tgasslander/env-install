@@ -29,6 +29,15 @@
 
   Expected: `config ok`. It is offline, launches no compositor, and is safe while Sway is running. **Any** reported error must be fixed before the commit. This gate exists because the plan was authored against an older Hyprland config API: `windowrulev2` was specified here and is deprecated in the installed 0.56.1, which this check caught. Treat every other Hyprland construct in this plan as similarly suspect — the parser, not the plan, is the authority on syntax.
 
+- **The verify gate does NOT cover `plugin { }` blocks.** Plugin config keys are registered by the plugin at load time, so `--verify-config` — which loads no plugins — reports `config ok` on a `plugin { hy3 { … } }` block full of names hy3 has never heard of. This is not hypothetical: the plan originally specified `col.active` / `col.inactive` / `col.urgent` for hy3 tab colors, which passed the gate and are wrong (hy3 nests them under `colors { }`). For anything inside `plugin { }`, verify names against the plugin binary instead:
+
+  ```bash
+  strings /usr/lib/libhy3.so | grep -oE 'plugin:hy3:[a-z_:.]+' | sort -u   # config keys
+  strings /usr/lib/libhy3.so | grep -oE '^hy3:[a-z]+' | sort -u             # dispatchers
+  ```
+
+  Both were run against the installed `hyprland-plugin-hy3 0.56.1-2.1`. All eight dispatchers this plan uses (`hy3:movefocus`, `hy3:movewindow`, `hy3:makegroup`, `hy3:changegroup`, `hy3:changefocus`, `hy3:killactive`, `hy3:movetoworkspace`, `hy3:setephemeral`) are confirmed to exist.
+
 ---
 
 ### Task 1: Package installation — `env-install.sh` list + `hyprland.inc`
@@ -421,9 +430,16 @@ plugin {
             height = 5
             padding = 8
             render_text = true
-            col.active = rgb(a6d189)
-            col.inactive = rgb(232634)
-            col.urgent = rgb(e78284)
+
+            # hy3 nests tab colors in their own block. There is no
+            # `col.active`-style key here — that is Hyprland core's
+            # convention, not hy3's. Verified against the plugin's own
+            # registered keys (plugin:hy3:tabs:colors:*).
+            colors {
+                active = rgb(a6d189)
+                inactive = rgb(232634)
+                urgent = rgb(e78284)
+            }
         }
 
         autotile {

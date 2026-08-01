@@ -437,11 +437,45 @@ Sway session. It is now mandatory before any commit that touches
 `hyprland.conf`. Nothing in the original spec called for it, which is why
 the defect would otherwise have surfaced at first login.
 
+**A second defect, which the gate could not catch.** This spec also specified
+hy3 tab colors as `col.active` / `col.inactive` / `col.urgent`. Those keys do
+not exist — `col.*` is Hyprland core's naming convention, not hy3's, which
+nests them in their own block:
+
+```
+tabs {
+    colors {
+        active = rgb(a6d189)
+        inactive = rgb(232634)
+        urgent = rgb(e78284)
+    }
+}
+```
+
+`--verify-config` reported `config ok` on the wrong version, because plugin
+config keys are registered by the plugin at load time and the verifier loads
+no plugins. **Anything inside `plugin { }` is outside the gate** and must be
+checked against the plugin binary instead:
+
+```bash
+strings /usr/lib/libhy3.so | grep -oE 'plugin:hy3:[a-z_:.]+' | sort -u
+strings /usr/lib/libhy3.so | grep -oE '^hy3:[a-z]+' | sort -u
+```
+
+Run against the installed `hyprland-plugin-hy3 0.56.1-2.1`, this confirmed
+all eight dispatchers the keybinding table relies on
+(`hy3:movefocus`, `hy3:movewindow`, `hy3:makegroup`, `hy3:changegroup`,
+`hy3:changefocus`, `hy3:killactive`, `hy3:movetoworkspace`,
+`hy3:setephemeral`) do exist — so the translation table's dispatcher names
+are sound even though its plugin config keys were not.
+
 **The general lesson**, which applies to the rest of this document: where
 this spec asserts Hyprland syntax, the installed parser is the authority,
-not the spec. Everything else in `hyprland.conf` was confirmed to parse
-clean, so the defect is isolated — but the hy3 dispatcher names carry the
-same kind of risk and are verified against the installed plugin in Task 4.
+not the spec — and where the parser has no opinion (plugin blocks), the
+plugin binary is. Two of this spec's Hyprland constructs were wrong on first
+contact with the real system; both were found by tooling rather than by
+reading, which is the argument for running the checks before first login
+rather than debugging a broken session afterwards.
 
 ## Risks
 

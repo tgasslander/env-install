@@ -40,6 +40,7 @@ else
 		hyprland hyprlock hypridle hyprpaper hyprpolkitagent \
 		xdg-desktop-portal-hyprland waybar \
 		i3blocks vim \
+		wezterm \
 		base-devel python \
 		shellcheck shfmt \
 		wget rofi unzip \
@@ -109,7 +110,7 @@ cd ~/dotfiles || exit
 if [ "$PKG_MGR" = "apt" ]; then
 	stow -R i3 i3blocks nvim starship Xresources tmux kitty picom rofi wezterm scripts
 else
-	stow -R sway hypr waybar i3blocks nvim starship Xresources tmux kitty rofi scripts
+	stow -R sway hypr waybar i3blocks nvim starship Xresources tmux kitty rofi wezterm scripts
 fi
 cd - || exit
 echo "stowed configs from dotfiles"

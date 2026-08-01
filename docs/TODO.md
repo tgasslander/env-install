@@ -7,6 +7,12 @@ Transient list of tasks to be done. Not documentation — delete entries as they
 - [ ] Confirm `wezterm` is in the official Arch repos on the target box; fall back to AUR if not.
 - [ ] `nvm`/`oh-my-zsh`/`fonts.inc` curl-pipe installers are cross-distro but unverified on Arch — sanity-check.
 
+## Hyprland
+- [ ] After every `hyprland` upgrade, check `hyprctl plugin list` and reinstall `hyprland-plugin-hy3` if hy3 is missing. This recurs indefinitely — it is not a one-time migration cost.
+- [ ] Test native-Wayland `wezterm` under Hyprland. `$mod+Return` still launches it with `config.enable_wayland = false` (set 2026-07-26 for the wlroots `wl_shm` abort). Hyprland uses aquamarine, not wlroots, so the flag is likely unnecessary there — but `wezterm.lua` is shared with the Debian/i3 path, so it cannot simply be flipped.
+- [ ] The 2026-07-25 spec's amendments record a `wezterm` → `kitty` switch for `$mod+Return` that never landed in the Sway config. Decide which is intended and make both sessions agree.
+- [ ] `exit.sh`'s suspend/hibernate rely on `hypridle`'s `before_sleep_cmd` for locking, because `hyprlock` cannot daemonize. If `hypridle` is not running, suspend happens UNLOCKED. Verify on first login.
+
 ## Kubernetes tooling
 - [ ] Verify the Debian path of `k8s.inc` on an actual Debian/Ubuntu box (Arch path tested, Debian path only URL-checked).
 - [ ] `K9S_VERSION` in `k8s.inc` is pinned (currently v0.51.0) — bump periodically; the Arch side tracks the repo automatically.

@@ -28,9 +28,17 @@ else
 	# Sway replaces i3+X11+picom on Arch: it's Wayland-native (no xorg-server
 	# needed at all) and deliberately i3-config-compatible. See
 	# docs/superpowers/specs/2026-07-25-sway-i3-replacement-design.md.
+	#
+	# Hyprland is installed alongside it as the primary session, with Sway
+	# kept as the fallback: hy3 (the plugin that gives Hyprland i3-style
+	# manual tiling) is compiled against an exact Hyprland version and
+	# refuses to load after a mismatched upgrade. See
+	# docs/superpowers/specs/2026-08-01-hyprland-setup-design.md.
 	pkg_install \
 		zsh tmux stow curl clang htop \
 		sway swaylock swayidle swaybg brightnessctl wlr-randr jq \
+		hyprland hyprlock hypridle hyprpaper hyprpolkitagent \
+		xdg-desktop-portal-hyprland waybar \
 		i3blocks vim \
 		base-devel python \
 		shellcheck shfmt \
@@ -72,6 +80,13 @@ echo "i3 sources"
 echo
 source i3.inc
 
+echo "Hyprland plugin (hy3)"
+echo
+# Executed, not sourced: nothing here needs to leak into the parent shell.
+# No-op on Debian. Must run after the main package install so hyprland is
+# already present for the plugin to build against.
+./hyprland.inc
+
 echo "nvm"
 PROFILE=/dev/null bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash'
 
@@ -94,7 +109,7 @@ cd ~/dotfiles || exit
 if [ "$PKG_MGR" = "apt" ]; then
 	stow -R i3 i3blocks nvim starship Xresources tmux kitty picom rofi wezterm scripts
 else
-	stow -R sway i3blocks nvim starship Xresources tmux kitty rofi scripts
+	stow -R sway hypr waybar i3blocks nvim starship Xresources tmux kitty rofi scripts
 fi
 cd - || exit
 echo "stowed configs from dotfiles"

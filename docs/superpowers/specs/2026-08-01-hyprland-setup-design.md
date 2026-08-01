@@ -131,7 +131,7 @@ single most likely way for the port to look subtly wrong.
 | `floating_modifier $mod` | `bindm = $mod, mouse:272, movewindow` and `bindm = $mod, mouse:273, resizewindow` |
 | `mode "resize"` | `submap = resize` |
 | `mode "$system"` | `submap = system` |
-| `for_window [class=…] floating enable` | `windowrulev2 = float, class:^(…)$` |
+| `for_window [class=…] floating enable` | `windowrule { … match { class = … } }` — see the amendment below |
 
 The exact hy3 dispatcher spellings above are taken from upstream
 documentation and **must be verified against the installed plugin's README**
@@ -400,6 +400,48 @@ These cannot be scripted and must be documented for the user:
   did under Sway.
 - `bash -n`, `shellcheck` and `shfmt -d` pass on `hyprland.inc` and the
   Chrome wrapper — this repo's only static checks.
+
+## Amendment (2026-08-01): window-rule syntax, and a verify gate
+
+This spec was written before Hyprland had ever run on this machine, against
+an older config API. One construct in it is invalid on the installed
+0.56.1, and the way it was caught is worth recording.
+
+**The defect.** The translation table originally specified
+`windowrulev2 = float, class:^(…)$`. On Hyprland 0.56.1 that produces
+`windowrulev2 is deprecated`. A bare rename to `windowrule` also fails, with
+`invalid field float: missing a value` — the grammar changed, not just the
+keyword.
+
+**The real grammar.** `windowrule` is now a *special category keyed by
+`name`*: action fields at the top level, match criteria in a nested `match`
+block. Probing the parser established that `float`, `content`, `tag`,
+`fullscreen`, `pin`, `opacity`, `workspace`, `monitor`, `size` and `move`
+are valid top-level fields, while `class`, `title`, `initialClass`,
+`initialTitle` and `xwayland` are not — those are match criteria. The
+verified replacement, which makes the whole config return `config ok`:
+
+```
+windowrule {
+    name = calculator
+    float = true
+    match {
+        class = ^(org\.gnome\.Calculator|[Gg]nome-calculator)$
+    }
+}
+```
+
+**The gate.** `hyprland --verify-config --config <file>` parses a config
+offline, launching no compositor, and is safe to run from inside a running
+Sway session. It is now mandatory before any commit that touches
+`hyprland.conf`. Nothing in the original spec called for it, which is why
+the defect would otherwise have surfaced at first login.
+
+**The general lesson**, which applies to the rest of this document: where
+this spec asserts Hyprland syntax, the installed parser is the authority,
+not the spec. Everything else in `hyprland.conf` was confirmed to parse
+clean, so the defect is isolated — but the hy3 dispatcher names carry the
+same kind of risk and are verified against the installed plugin in Task 4.
 
 ## Risks
 

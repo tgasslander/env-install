@@ -21,6 +21,13 @@
 - **Static checks are this repo's only automated tests:** `bash -n <file>`, `shellcheck <file>`, `shfmt -d <file>`. There is no test suite. Config correctness is verified with `hyprctl configerrors` and on-hardware checks.
 - **`hyprland.inc` is executed, not sourced** (like `k8s.inc`, `docker.inc`, `fonts.inc`). It sees exported `PKG_MGR` but **not** `common.inc`'s `pkg_install`/`pkg_update` helpers, so it calls `pacman`/`yay` directly.
 - **hy3 dispatcher names in this plan come from upstream documentation, not a running system.** Task 4 verifies them against the installed plugin before they are trusted.
+- **Mandatory config verify gate.** Every task that writes or edits `hyprland.conf` MUST run, and show the output of, this before committing:
+
+  ```bash
+  hyprland --verify-config --config /home/toga/dotfiles/hypr/.config/hypr/hyprland.conf
+  ```
+
+  Expected: `config ok`. It is offline, launches no compositor, and is safe while Sway is running. **Any** reported error must be fixed before the commit. This gate exists because the plan was authored against an older Hyprland config API: `windowrulev2` was specified here and is deprecated in the installed 0.56.1, which this check caught. Treat every other Hyprland construct in this plan as similarly suspect — the parser, not the plan, is the authority on syntax.
 
 ---
 
@@ -429,7 +436,19 @@ plugin {
 # Sway needed two rules here — `class` criteria only match XWayland windows,
 # so a separate `app_id` rule was required for the native Wayland case.
 # Hyprland's `class` matches both, so one regex covers it.
-windowrulev2 = float, class:^(org\.gnome\.Calculator|[Gg]nome-calculator)$
+#
+# Hyprland 0.56.1 grammar: `windowrule` is a special category keyed by `name`,
+# with action fields at the top level and criteria in a nested `match` block.
+# `windowrulev2` is deprecated, and a bare rename to `windowrule = float,
+# class:...` also fails ("invalid field float: missing a value") — the grammar
+# changed, not just the keyword.
+windowrule {
+    name = calculator
+    float = true
+    match {
+        class = ^(org\.gnome\.Calculator|[Gg]nome-calculator)$
+    }
+}
 
 # Autostart. Sway's `exec` / `exec --no-startup-id` lines become exec-once.
 # mako is shared with the Sway session (compositor-agnostic, and

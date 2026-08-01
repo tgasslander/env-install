@@ -181,14 +181,17 @@ here so it is not mistaken for an oversight later.
 
 ## Behavioral regressions
 
-Three bindings have no exact Hyprland equivalent. These are the only
-intentional behavior losses:
+**Two** bindings have no exact Hyprland equivalent (this section originally
+claimed three — see item 2). These are the only intentional behavior losses:
 
 1. **`$mod+s layout stacking`** — hy3 implements *tabbed* groups only; i3's
    *stacked* layout has no counterpart. Rebound to `hy3:changegroup, tab`.
-2. **`$mod+Shift+t focus mode_toggle`** — no dispatcher moves focus between
-   the tiling and floating stacks. Best-effort rebind: `cyclenext, floating`.
-   Not equivalent.
+2. ~~**`$mod+Shift+t focus mode_toggle`** — no dispatcher moves focus between
+   the tiling and floating stacks.~~ **RETRACTED 2026-08-01 — this was wrong.**
+   hy3 registers `hy3:togglefocuslayer, [nowarp]`, documented upstream as
+   "toggle focus between tiled and floating layers" — exactly Sway's
+   `focus mode_toggle`. It is bound to `$mod+Shift+t` and is **not** a
+   regression. See the amendment section.
 3. **`$mod+Shift+e` swaynag exit confirmation** — `swaynag` is Sway-specific.
    Replaced with a `rofi -dmenu` yes/no confirmation, preserving the guard
    rather than binding a bare `exit`. Rofi is already installed and themed.
@@ -468,6 +471,32 @@ all eight dispatchers the keybinding table relies on
 `hy3:changefocus`, `hy3:killactive`, `hy3:movetoworkspace`,
 `hy3:setephemeral`) do exist — so the translation table's dispatcher names
 are sound even though its plugin config keys were not.
+
+**A third defect: a regression claimed that was not real.** This spec listed
+`$mod+Shift+t focus mode_toggle` as unportable, asserting no dispatcher moves
+focus between the tiling and floating stacks, and settled for
+`cyclenext, floating`. That assertion was false. hy3 registers
+`hy3:togglefocuslayer, [nowarp]`, documented upstream as "toggle focus
+between tiled and floating layers" — precisely Sway's semantics. It is now
+bound directly and the regression list drops from three to two. This is the
+inverse of the first two defects: not syntax that failed loudly, but a
+capability wrongly assumed absent, which would have quietly shipped a worse
+port. Enumerating what a dependency actually provides beats reasoning about
+what it probably lacks.
+
+**A fourth correction, to the gate itself.** `--verify-config` *does*
+validate dispatcher names, so once hy3 bindings are present it can never
+return `config ok` — it loads no plugins and rejects all 33 `hy3:*` lines.
+The pass condition from Task 4 onward is **zero non-`hy3:` errors**, not
+`config ok`:
+
+```bash
+hyprland --verify-config --config <file> 2>&1 | grep 'Config error' | grep -v 'hy3'
+```
+
+This must print nothing. Substituting core dispatchers for the hy3 ones in a
+scratch copy and getting `config ok` is a useful way to prove no other
+grammar fault hides behind the plugin noise.
 
 **The general lesson**, which applies to the rest of this document: where
 this spec asserts Hyprland syntax, the installed parser is the authority,

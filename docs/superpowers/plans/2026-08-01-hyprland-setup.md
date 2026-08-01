@@ -27,7 +27,16 @@
   hyprland --verify-config --config /home/toga/dotfiles/hypr/.config/hypr/hyprland.conf
   ```
 
-  Expected: `config ok`. It is offline, launches no compositor, and is safe while Sway is running. **Any** reported error must be fixed before the commit. This gate exists because the plan was authored against an older Hyprland config API: `windowrulev2` was specified here and is deprecated in the installed 0.56.1, which this check caught. Treat every other Hyprland construct in this plan as similarly suspect — the parser, not the plan, is the authority on syntax.
+  It is offline, launches no compositor, and is safe while Sway is running.
+
+  **Expected output depends on whether the file contains hy3 bindings.** `--verify-config` validates dispatcher names but loads no plugins, so every `hy3:*` binding is reported as `Invalid dispatcher, requested "hy3:…" does not exist`. That is expected and not a defect. The pass condition is therefore:
+
+  - Before Task 4 (no hy3 bindings): `config ok`.
+  - From Task 4 onward: **zero non-`hy3:` errors.** Check with
+    ```bash
+    hyprland --verify-config --config <file> 2>&1 | grep 'Config error' | grep -v 'hy3'
+    ```
+    which must print nothing. Any non-hy3 error must be fixed before the commit. This gate exists because the plan was authored against an older Hyprland config API: `windowrulev2` was specified here and is deprecated in the installed 0.56.1, which this check caught. Treat every other Hyprland construct in this plan as similarly suspect — the parser, not the plan, is the authority on syntax.
 
 - **The verify gate does NOT cover `plugin { }` blocks.** Plugin config keys are registered by the plugin at load time, so `--verify-config` — which loads no plugins — reports `config ok` on a `plugin { hy3 { … } }` block full of names hy3 has never heard of. This is not hypothetical: the plan originally specified `col.active` / `col.inactive` / `col.urgent` for hy3 tab colors, which passed the gate and are wrong (hy3 nests them under `colors { }`). For anything inside `plugin { }`, verify names against the plugin binary instead:
 

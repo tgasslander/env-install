@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Hyprland's AUR dependency. Arch/pacman only — no-op on Debian, which keeps
-# i3 + X11.
+# The Hyprland setup's AUR dependencies. Arch/pacman only — no-op on Debian,
+# which keeps i3 + X11.
 #
 # Executed, not sourced (like k8s.inc/docker.inc/fonts.inc): nothing here
 # needs to leak into the parent shell. That also means common.inc's
@@ -9,8 +9,9 @@
 # pacman and yay are called directly.
 #
 # The repo-available Hyprland packages are installed from env-install.sh's
-# main pacman list. This file exists solely because hy3 is AUR-only, and is
-# the first AUR dependency this repo has ever had.
+# main pacman list. This file exists solely for packages only available on
+# the AUR: hy3 (compiled against Hyprland) and overskride (no `extra`/
+# `cachyos-extra` build).
 
 set -eu
 
@@ -45,3 +46,6 @@ yay -S --needed --noconfirm hyprland-plugin-hy3
 # "plugin failed to load" at session start.
 echo "hy3 plugin object installed at:"
 pacman -Ql hyprland-plugin-hy3 | grep -F '.so' || echo "  WARNING: no .so found in hyprland-plugin-hy3"
+
+echo "Installing overskride (Bluetooth client GUI, AUR-only bin package)"
+yay -S --needed --noconfirm overskride-bin

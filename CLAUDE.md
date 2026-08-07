@@ -8,7 +8,7 @@ Be concise in your answers.
 
 ## What this is
 
-A set of Bash scripts that bootstrap a personal Linux dev environment from scratch: terminal emulators (WezTerm, kitty), window manager (i3 + i3blocks/i3lock/picom/rofi/feh), shell (zsh + oh-my-zsh + starship), editor (Neovim), Hack Nerd Font, tmux, GNU stow, language toolchains (node via nvm, Go via snap), Kubernetes/DB CLI tooling (kubectl, k9s, kubectx/kubens, the psql client), and Docker (engine + compose/buildx plugins). It clones the user's dotfiles repo and applies them with `stow`.
+A set of Bash scripts that bootstrap a personal Linux dev environment from scratch: terminal emulators (WezTerm, kitty), window manager (Debian: i3 + i3blocks/i3lock/picom/rofi/feh; Arch: Hyprland + hy3/Waybar as the primary session with Sway kept as a fallback), shell (zsh + oh-my-zsh + starship), editor (Neovim), Hack Nerd Font, tmux, GNU stow, language toolchains (node via nvm, Go via snap), Kubernetes/DB CLI tooling (kubectl, k9s, kubectx/kubens, the psql client), and Docker (engine + compose/buildx plugins). It clones the user's dotfiles repo and applies them with `stow`.
 
 ## Running
 
@@ -20,7 +20,8 @@ The script is idempotent: reruns `git pull` instead of re-cloning `~/dotfiles`, 
 
 ## Architecture
 
-- `env-install.sh` is the **orchestrator**. It runs package installs itself, then pulls in each `*.inc` file for a specific component. The `.inc` files are plain Bash sourced or executed from the orchestrator, not a plugin system — order matters (k8s → docker → fonts → i3 → nvm → dotfiles → zsh → nvim → oh-my-zsh → stow zsh → starship → node → go).
+- `env-install.sh` is the **orchestrator**. It runs package installs itself, then pulls in each `*.inc` file for a specific component. The `.inc` files are plain Bash sourced or executed from the orchestrator, not a plugin system — order matters (k8s → docker → fonts → i3 → hyprland → nvm → dotfiles → zsh → nvim → oh-my-zsh → stow zsh → starship → node → go).
+- `hyprland.inc` holds the repo's **only AUR dependencies**. It bootstraps `yay` (guarded on `command -v yay`) and installs `hyprland-plugin-hy3`, which is compiled against an exact Hyprland version and refuses to load against any other, plus `overskride-bin` (Bluetooth client GUI, AUR-only). The repo-available Hyprland packages come from the main pacman list; this file exists only for the AUR-only ones. Sway is deliberately still installed and stowed on Arch as the fallback session for when a `hyprland` upgrade outruns the plugin.
 - `.inc` files are invoked inconsistently: some with `source` (`i3.inc`, `zsh.inc`, `nvim.inc`, `oh-my-zsh.inc`, `starship.inc`) and three by execution (`./fonts.inc`, `./k8s.inc`, `./docker.inc`). Executed files run in a child process, so they see exported variables like `PKG_MGR` but not `common.inc`'s `pkg_install`/`pkg_update` functions. `source` runs in the current shell (env changes persist, `cd` leaks); execution runs in a subshell. Preserve the existing mechanism for a given step unless intentionally changing it, since some steps rely on shared state (e.g. nvm/node).
 - Step ordering has real dependencies: `nvim.inc` runs `npm install --global yarn`, so `nvm install node` must run first (it does, right after nvm itself is installed); `stow` steps require `~/dotfiles` to already be cloned; `starship.inc` assumes the zsh + oh-my-zsh + stowed `.zshrc` chain completed. The script never sources `~/.zshrc` itself (it's zsh syntax, and the script runs under bash) — it just prints a reminder to open a new shell.
 
